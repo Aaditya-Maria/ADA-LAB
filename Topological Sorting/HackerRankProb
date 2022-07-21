@@ -1,0 +1,125 @@
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <stdlib.h>
+void solve();
+void BFS(int, int a[][1000], int);
+
+
+typedef struct LLNode{
+    struct LLNode *next;
+    int val;
+}Node;
+
+
+typedef struct Queue{
+    Node *head;
+    Node *tail;
+    int length;
+}que,queue;
+
+int enqueue(que *q, int val);
+int dequeue(que *q);
+int isEmpty(que *q);
+
+
+/*
+* RETURN
+* -1 -> failed to enqueue
+*  0 -> successfully enqueued
+*/
+int enqueue(que *q, int val){
+    
+    Node *newNode = (Node *)malloc(sizeof(Node));
+    if(!newNode)
+    return -1;
+    newNode->next = NULL;
+    newNode->val= val;
+    if(isEmpty(q)){
+        q->head = newNode;
+        q->tail = newNode;
+        q->length++;
+    } else {
+        q->tail->next = newNode;
+        q->tail = newNode;
+        q->length++;
+    }
+    return 0;
+}
+
+int dequeue(que *q){
+    if(isEmpty(q))
+    return -1;
+    
+    int ret = q->head->val;
+    Node *tmp = q->head;
+    q->head = q->head->next;
+    free(tmp);
+    q->length--;
+    return ret;
+}
+
+int isEmpty(que *q){
+    if(q->head == NULL)
+    return 1;
+    else
+        return 0;
+}
+
+void BFS(int st, int adj[][1000],int len){
+    int i;
+    que *q = (que *)malloc(sizeof(q));
+    q->head = NULL;
+    q->length = 0;
+    q->tail = NULL;
+    enqueue(q,st);
+    int *dist = (int *)malloc(sizeof(int)*len);
+    for(i=0;i<len;i++)
+        dist[i] = -1;
+    dist[st] = 0;
+    while(!isEmpty(q)){
+        int v = dequeue(q);
+        for(i=0;i<len;i++){
+            if(adj[v][i] == 1 || adj[i][v] == 1){
+                if(dist[i] != -1 && dist[v] + 6 < dist[i]){
+                    dist[i] = dist[v] + 6;
+                    enqueue(q,i);
+                }
+                else if(dist[i] == -1){
+                    dist[i] = dist[v] + 6;
+                    enqueue(q,i);
+                }
+            }
+        }
+    }
+    for(i=0;i<len;i++){
+        if(i != st){
+            printf("%d ",dist[i]);
+        }
+    }
+    free(dist);
+    free(q);
+}
+
+
+int main() {
+    
+    
+    int i,T = 0;
+    scanf("%d",&T);
+    for(i = 0; i<T;i++){
+        int st,i,N,M,x,y;
+        scanf("%d",&N);
+        scanf("%d",&M);
+        int adj[1000][1000] = {0};// = (int **)calloc(N*N,(sizeof(int)));
+        for(i=0;i<M;i++){
+            scanf("%d",&x);
+            scanf("%d",&y);
+            adj[x-1][y-1] = 1;
+        }
+        scanf("%d",&st);
+        BFS(st-1,adj,N);
+        printf("\n");
+    }
+    return 0;
+}
